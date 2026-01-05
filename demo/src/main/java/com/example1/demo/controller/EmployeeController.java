@@ -4,10 +4,15 @@ import com.example1.demo.dto.EmployeeDto;
 import com.example1.demo.service.EmployeeService;
 import com.example1.demo.service.impl.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -56,5 +61,23 @@ public class EmployeeController {
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable int id) {
         EmployeeDto getEmployeeById = employeeService.getEmployeeById(id);
         return new ResponseEntity<>(getEmployeeById, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/uploadPhoto/{id}")
+    public ResponseEntity<String> uploadPhoto(@PathVariable int id, @RequestParam("file") MultipartFile file) {
+        String path = employeeService.uploadPhoto(id, file);
+        return ResponseEntity.ok("Photo uploaded: " + path);
+    }
+
+    @GetMapping("/photo/{id}")
+    public ResponseEntity<ByteArrayResource> getPhoto(@PathVariable int id) {
+        byte[] data = employeeService.getPhoto(id);
+        ByteArrayResource resource = new ByteArrayResource(data);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=uploads/")
+                .contentType(MediaType.IMAGE_JPEG)
+                .contentLength(data.length)
+                .body(resource);
     }
 }

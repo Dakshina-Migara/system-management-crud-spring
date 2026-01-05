@@ -14,4 +14,6 @@ public class EmployeeDto {
     private String name;
     private int age;
     private double salary;
+    private String photoPath;
+
 }

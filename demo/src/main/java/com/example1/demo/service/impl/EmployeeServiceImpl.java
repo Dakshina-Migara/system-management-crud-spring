@@ -6,7 +6,12 @@ import com.example1.demo.repository.EmployeeRepo;
 import com.example1.demo.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,9 +28,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (update.isPresent()) {
             Employee updated = employeeRepo.save(new Employee(employeeDto.getNic(), employeeDto.getName(), employeeDto.getAge(), employeeDto.getSalary()));
-            return new EmployeeDto(updated.getId(), updated.getNic(), updated.getName(), updated.getAge(), updated.getSalary());
+            return new EmployeeDto(updated.getId(), updated.getNic(), updated.getName(), updated.getAge(), updated.getSalary(), updated.getPhotoPath());
         }
-
         return null;
     }
 
@@ -35,9 +39,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (byNic.isPresent()) {
             Employee employee = byNic.get();
-            return new EmployeeDto(employee.getId(), employee.getNic(), employee.getName(), employee.getAge(), employee.getSalary());
+            return new EmployeeDto(employee.getId(), employee.getNic(), employee.getName(), employee.getAge(), employee.getSalary(), employee.getPhotoPath());
         }
-
         return null;
     }
 
@@ -46,7 +49,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Optional<Employee> byId = employeeRepo.findById(id);
         if (byId.isPresent()) {
             Employee employee = byId.get();
-            return new EmployeeDto(employee.getId(), employee.getNic(), employee.getName(), employee.getAge(), employee.getSalary());
+            return new EmployeeDto(employee.getId(), employee.getNic(), employee.getName(), employee.getAge(), employee.getSalary(), employee.getPhotoPath());
         }
         return null;
     }
@@ -61,7 +64,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                         employee.getNic(),
                         employee.getName(),
                         employee.getAge(),
-                        employee.getSalary()
+                        employee.getSalary(),
+                        employee.getPhotoPath()
                 ))
                 .collect(Collectors.toList());
     }
@@ -78,6 +82,38 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
         Employee save = employeeRepo.save(new Employee(employeeDto.getNic(), employeeDto.getName(), employeeDto.getAge(), employeeDto.getSalary()));
-        return new EmployeeDto(save.getId(), save.getNic(), save.getName(), save.getAge(), save.getSalary());
+        return new EmployeeDto(save.getId(), save.getNic(), save.getName(), save.getAge(), save.getSalary(), save.getPhotoPath());
     }
+
+    @Override
+    public String uploadPhoto(int id, MultipartFile file) {
+        try {
+            Employee employee = employeeRepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + id));
+            String uploadDir = "uploads/";
+            Files.createDirectories(Paths.get(uploadDir));
+            Path filePath = Paths.get(uploadDir + file.getOriginalFilename());
+            Files.write(filePath, file.getBytes());
+            employee.setPhotoPath(filePath.toString());
+            employeeRepo.save(employee);
+
+            return filePath.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public byte[] getPhoto(int id) {
+        try {
+            Employee employee = employeeRepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + id));
+            if (employee.getPhotoPath() == null) throw new RuntimeException("No photo uploaded");
+            Path path = Paths.get(employee.getPhotoPath());
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read photo: " + e.getMessage());
+        }
+    }
+
 }
