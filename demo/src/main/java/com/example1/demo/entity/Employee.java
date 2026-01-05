@@ -20,6 +20,8 @@ public class Employee {
     private String name;
     private int age;
     private double salary;
+    private String photoPath;
+
 
     public Employee(String nic, String name, int age, double salary) {
         this.nic = nic;
