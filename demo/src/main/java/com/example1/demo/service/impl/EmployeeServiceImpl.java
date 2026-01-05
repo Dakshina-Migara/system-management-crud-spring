@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -18,16 +19,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDto updateEmployee(EmployeeDto employeeDto) {
-        return employeeDto;
+        Optional<Employee> update = employeeRepo.findById(employeeDto.getId());
+
+        if (update.isPresent()) {
+            Employee updated = employeeRepo.save(new Employee(employeeDto.getNic(), employeeDto.getName(), employeeDto.getAge(), employeeDto.getSalary()));
+            return new EmployeeDto(updated.getId(), updated.getNic(), updated.getName(), updated.getAge(), updated.getSalary());
+        }
+
+        return null;
     }
 
     @Override
     public EmployeeDto getEmployeeByNic(String nic) {
-        String<Employee> byNic = employeeRepo.(nic);
+        Optional<Employee> byNic = employeeRepo.findByNic(nic);
+
         if (byNic.isPresent()) {
             Employee employee = byNic.get();
             return new EmployeeDto(employee.getId(), employee.getNic(), employee.getName(), employee.getAge(), employee.getSalary());
         }
+
         return null;
     }
 
@@ -43,16 +53,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDto> getAllEmployee() {
-        return List.of(
-                new EmployeeDto(1, "200300903343", "Migara", 23, 2000),
-                new EmployeeDto(2, "200300903344", "Kamal", 25, 3000),
-                new EmployeeDto(3, "200300903345", "Nimal", 28, 3500)
-        );
+        List<Employee> employees = employeeRepo.findAll();
+
+        return employees.stream()
+                .map(employee -> new EmployeeDto(
+                        employee.getId(),
+                        employee.getNic(),
+                        employee.getName(),
+                        employee.getAge(),
+                        employee.getSalary()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean deleteEmployee(int id) {
-        return true;
+        if (employeeRepo.existsById(id)) {
+            employeeRepo.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     @Override
