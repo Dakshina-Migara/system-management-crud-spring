@@ -24,7 +24,7 @@ public class EmployeeController {
     }
 
 
-    @DeleteMapping("/{nic}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Boolean> deleteEmployee(@PathVariable int id) {
         boolean deleted = employeeService.deleteEmployee(id);
         return new ResponseEntity<>(deleted, HttpStatus.CREATED);
@@ -45,7 +45,7 @@ public class EmployeeController {
     }
 
 
-    @GetMapping("/getByNic{nic}")
+    @GetMapping("/getByNic/{nic}")
     public ResponseEntity<EmployeeDto> getEmployeeByNic(@PathVariable String nic) {
         EmployeeDto getEmployeeByNic = employeeService.getEmployeeByNic(nic);
         return new ResponseEntity<>(getEmployeeByNic, HttpStatus.CREATED);
