@@ -18,9 +18,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
+    private final EmployeeService employeeService;
 
     @Autowired
-    EmployeeService employeeService;
+    public EmployeeController(EmployeeService employeeService){
+        this.employeeService = employeeService;
+    }
 
     @PostMapping("/save")
     public ResponseEntity<EmployeeDto> saveEmployee(@RequestBody EmployeeDto employeeDto) {

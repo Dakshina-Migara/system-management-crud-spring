@@ -19,8 +19,12 @@ import java.util.stream.Collectors;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
+    private final EmployeeRepo employeeRepo;
+
     @Autowired
-    EmployeeRepo employeeRepo;
+    public EmployeeServiceImpl(EmployeeRepo employeeRepo){
+        this.employeeRepo = employeeRepo;
+    }
 
     @Override
     public EmployeeDto updateEmployee(EmployeeDto employeeDto) {
