@@ -14,7 +14,7 @@ public interface EmployeeService {
 
     EmployeeDto getEmployeeByNic(String nic);
 
-    EmployeeDto updateEmployee(EmployeeDto employeeDto);
+    EmployeeDto updateEmployee(int id,EmployeeDto employeeDto);
 
     EmployeeDto getEmployeeById(int id);
 

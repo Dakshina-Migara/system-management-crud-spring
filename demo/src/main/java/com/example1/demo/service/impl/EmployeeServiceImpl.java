@@ -19,19 +19,42 @@ import java.util.stream.Collectors;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
+    private final EmployeeRepo employeeRepo;
+
     @Autowired
-    EmployeeRepo employeeRepo;
+    public EmployeeServiceImpl(EmployeeRepo employeeRepo){
+        this.employeeRepo = employeeRepo;
+    }
 
     @Override
-    public EmployeeDto updateEmployee(EmployeeDto employeeDto) {
-        Optional<Employee> update = employeeRepo.findById(employeeDto.getId());
+    public EmployeeDto updateEmployee(int id, EmployeeDto employeeDto) {
+
+        Optional<Employee> update = employeeRepo.findById(id);
 
         if (update.isPresent()) {
-            Employee updated = employeeRepo.save(new Employee(employeeDto.getNic(), employeeDto.getName(), employeeDto.getAge(), employeeDto.getSalary()));
-            return new EmployeeDto(updated.getId(), updated.getNic(), updated.getName(), updated.getAge(), updated.getSalary(), updated.getPhotoPath());
+
+            Employee employee = update.get();
+
+            employee.setNic(employeeDto.getNic());
+            employee.setName(employeeDto.getName());
+            employee.setAge(employeeDto.getAge());
+            employee.setSalary(employeeDto.getSalary());
+
+            Employee updated = employeeRepo.save(employee);
+
+            return new EmployeeDto(
+                    updated.getId(),
+                    updated.getNic(),
+                    updated.getName(),
+                    updated.getAge(),
+                    updated.getSalary(),
+                    updated.getPhotoPath()
+            );
         }
-        return null;
+
+        throw new RuntimeException("Employee not found with id: " + id);
     }
+
 
     @Override
     public EmployeeDto getEmployeeByNic(String nic) {
