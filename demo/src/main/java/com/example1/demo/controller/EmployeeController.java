@@ -18,9 +18,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
+    private final EmployeeService employeeService;
 
     @Autowired
-    EmployeeService employeeService;
+    public EmployeeController(EmployeeService employeeService){
+        this.employeeService = employeeService;
+    }
 
     @PostMapping("/save")
     public ResponseEntity<EmployeeDto> saveEmployee(@RequestBody EmployeeDto employeeDto) {
@@ -36,9 +39,9 @@ public class EmployeeController {
     }
 
 
-    @PutMapping("/update")
-    public ResponseEntity<EmployeeDto> updateEmployee(@RequestBody EmployeeDto employeeDto) {
-        EmployeeDto updatedEmployee = employeeService.updateEmployee(employeeDto);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable int id ,@RequestBody EmployeeDto employeeDto) {
+        EmployeeDto updatedEmployee = employeeService.updateEmployee(id , employeeDto);
         return new ResponseEntity<>(updatedEmployee, HttpStatus.CREATED);
     }
 
